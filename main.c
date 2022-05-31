@@ -5,8 +5,9 @@
 #include <string.h>
 #include <unistd.h>
 
-#define GLOBAL_NAME  "Krita"
 #define GLOBAL_PAUSE_SEC (120)
+
+const char * window_name = NULL;
 
 static void _send_input(INPUT * in, WORD wVk, DWORD dwFlags) {
     in->ki.wVk     = wVk;
@@ -28,7 +29,7 @@ static int _check_title(HWND w) {
     char title[256];
     GetWindowText(w, title, 256);
 
-    return (strstr(title, GLOBAL_NAME) == 0);
+    return (strstr(title, window_name) == 0);
 }
 
 static void _save_work(void) {
@@ -48,9 +49,16 @@ static void _hide(void) {
     ShowWindow(cwin, SW_HIDE); 
 }
 
-int main(void) {
+int main(int argc, char * argv[]) {
     _hide();
     
+    if (argc != 2) {
+        fprintf(stderr, "Wrong number of arguments. Expecting window name part");
+        return EXIT_FAILURE;
+    }   
+    
+    window_name = argv[1];
+
     while (1) {
         _save_work();
         sleep(GLOBAL_PAUSE_SEC);
